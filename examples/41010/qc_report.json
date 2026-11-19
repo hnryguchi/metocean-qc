@@ -1,0 +1,185 @@
+{
+  "station": "41010",
+  "source": "ndbc",
+  "period_utc": [
+    "2026-10-05T00:00:00+00:00",
+    "2026-11-19T02:10:00+00:00"
+  ],
+  "records": 6347,
+  "flag_counts": {
+    "WDIR": {
+      "GOOD": 6208,
+      "MISSING": 139
+    },
+    "WSPD": {
+      "GOOD": 6293,
+      "MISSING": 54
+    },
+    "GST": {
+      "GOOD": 6293,
+      "MISSING": 54
+    },
+    "WVHT": {
+      "MISSING": 3291,
+      "GOOD": 3056
+    },
+    "DPD": {
+      "MISSING": 4318,
+      "NOT_EVALUATED": 2029
+    },
+    "APD": {
+      "MISSING": 3296,
+      "NOT_EVALUATED": 3051
+    },
+    "MWD": {
+      "MISSING": 3296,
+      "NOT_EVALUATED": 3051
+    },
+    "PRES": {
+      "GOOD": 6295,
+      "MISSING": 52
+    },
+    "ATMP": {
+      "GOOD": 6264,
+      "MISSING": 83
+    },
+    "WTMP": {
+      "GOOD": 6000,
+      "MISSING": 336,
+      "SUSPECT": 11
+    },
+    "DEWP": {
+      "GOOD": 6264,
+      "MISSING": 83
+    },
+    "VIS": {
+      "MISSING": 6347
+    },
+    "PTDY": {
+      "NOT_EVALUATED": 1056,
+      "MISSING": 5291
+    },
+    "TIDE": {
+      "MISSING": 6347
+    }
+  },
+  "not_evaluated_variables": [
+    "DPD",
+    "APD",
+    "MWD",
+    "VIS",
+    "PTDY",
+    "TIDE"
+  ],
+  "events": [
+    {
+      "id": "WTMP@2026-11-02T01:20Z",
+      "variable": "WTMP",
+      "start": "2026-11-02T01:20:00+00:00",
+      "end": "2026-11-02T03:00:00+00:00",
+      "worst_flag": "SUSPECT",
+      "tests": [
+        "flat_line"
+      ],
+      "findings": [
+        {
+          "time": "2026-11-02T01:20:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.0 h"
+        },
+        {
+          "time": "2026-11-02T01:30:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.2 h"
+        },
+        {
+          "time": "2026-11-02T01:40:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.3 h"
+        },
+        {
+          "time": "2026-11-02T01:50:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.5 h"
+        },
+        {
+          "time": "2026-11-02T02:00:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.7 h"
+        },
+        {
+          "time": "2026-11-02T02:10:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 24.8 h"
+        },
+        {
+          "time": "2026-11-02T02:20:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 25.0 h"
+        },
+        {
+          "time": "2026-11-02T02:30:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 25.2 h"
+        },
+        {
+          "time": "2026-11-02T02:40:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 25.3 h"
+        },
+        {
+          "time": "2026-11-02T02:50:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 25.5 h"
+        },
+        {
+          "time": "2026-11-02T03:00:00+00:00",
+          "test": "flat_line",
+          "flag": "SUSPECT",
+          "value": 27.8,
+          "detail": "unchanged for 25.7 h"
+        }
+      ]
+    },
+    {
+      "id": "*@2026-11-02T23:10Z",
+      "variable": "*",
+      "start": "2026-11-02T23:10:00+00:00",
+      "end": "2026-11-02T23:10:00+00:00",
+      "worst_flag": "SUSPECT",
+      "tests": [
+        "gap"
+      ],
+      "findings": [
+        {
+          "time": "2026-11-02T23:10:00+00:00",
+          "test": "gap",
+          "flag": "SUSPECT",
+          "value": null,
+          "detail": "no records for 9.0 h before this time"
+        }
+      ]
+    }
+  ],
+  "reviews": []
+}

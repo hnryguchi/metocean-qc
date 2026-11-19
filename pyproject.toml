@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metocean-qc"
+version = "0.1.0"
+description = "Deterministic quality control for meteorological and ocean time series, with an optional LLM second opinion."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Henry Noguchi" }]
+dependencies = []
+
+[project.optional-dependencies]
+llm = ["anthropic>=2.0"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+metqc = "metqc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
