@@ -37,15 +37,16 @@
       vec3 n = normalize(vNormal);
       vec3 v = normalize(cameraPosition - vPos);
       float fres = pow(1.0 - max(dot(n, v), 0.0), 4.0);
-      vec3 deep = mix(uDeep, vec3(0.30, 0.05, 0.08), uWarm * 0.55);
-      vec3 shallow = mix(uShallow, vec3(0.95, 0.42, 0.20), uWarm * 0.6);
+      vec3 deep = mix(uDeep, vec3(0.32, 0.04, 0.07), uWarm * 0.85);
+      vec3 shallow = mix(uShallow, vec3(1.0, 0.45, 0.22), uWarm * 0.9);
+      vec3 sky = mix(uSky, vec3(0.62, 0.24, 0.20), uWarm * 0.75);
       vec3 water = mix(deep, shallow, clamp(vCrest * 0.18 + 0.35, 0.0, 1.0));
-      vec3 col = mix(water, uSky, fres * 0.85);
+      vec3 col = mix(water, sky, fres * 0.85);
       vec3 h = normalize(uSunDir + v);
       col += uSun * pow(max(dot(n, h), 0.0), 220.0) * 1.6;
       col += vec3(0.9) * smoothstep(1.4, 2.6, vCrest) * 0.25;          // foam on the highest crests
       float dist = length(cameraPosition - vPos);
-      col = mix(col, uSky, smoothstep(60.0, 260.0, dist));              // haze to the horizon
+      col = mix(col, sky, smoothstep(60.0, 260.0, dist));               // haze to the horizon
       gl_FragColor = vec4(col, 1.0);
     }`;
 
