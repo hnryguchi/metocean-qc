@@ -158,3 +158,19 @@ def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str
         "</svg>",
     ]
     return "".join(parts)
+
+
+def brand(svg: str) -> str:
+    """Fixed navy palette (used by the author's profile README), regardless of the viewer's theme."""
+    for old, new in (
+        ("@media (prefers-color-scheme:dark){text{fill:#e6edf3}.m,.u{fill:#9198a1}"
+         ".bg{fill:#0d1117;stroke:#3d444d}.ln{stroke:#4493f8}.ax{stroke:#3d444d}}", ""),
+        ("fill:#1f2328}", "fill:#f0f9ff}"),
+        (".m{fill:#59636e;", ".m{fill:#9cc3dc;"),
+        (".u{fill:#59636e;", ".u{fill:#9cc3dc;"),
+        (".bg{fill:#fff;stroke:#d1d9e0}", ".bg{fill:#081a2e;stroke:#16324f}"),
+        (".ln{stroke:#0969da}.ax{stroke:#d1d9e0}", ".ln{stroke:#2dd4bf}.ax{stroke:#16324f}"),
+    ):
+        assert old in svg, old
+        svg = svg.replace(old, new)
+    return svg
