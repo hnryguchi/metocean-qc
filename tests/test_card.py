@@ -37,3 +37,11 @@ def test_cli_writes_card(tmp_path):
     rc = main(["check", str(FIXTURES / "ndbc_41010_sample.txt"), "--out", str(tmp_path / "r"),
                "--card", str(card), "--title", "Buoy 41010"])
     assert rc == 0 and card.read_text(encoding="utf-8").startswith("<svg")
+
+
+def test_portuguese_card(ndbc_text):
+    series = parse_ndbc(ndbc_text, station="41010")
+    result = run_qc(series)
+    svg = status_svg(result, group_events(result), lang="pt")
+    ET.fromstring(svg)
+    assert "Boia 41010: controle de qualidade automático" in svg and "Água" in svg and "Últimos 7 dias" in svg

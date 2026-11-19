@@ -12,13 +12,32 @@ from datetime import timedelta
 from .engine import Event, QCResult
 from .models import Flag
 
-READINGS = [  # (variable, label, decimals)
-    ("WTMP", "Water", 1),
-    ("ATMP", "Air", 1),
-    ("WSPD", "Wind", 0),
-    ("PRES", "Pressure", 1),
-    ("WVHT", "Waves", 1),
+READINGS = [  # (variable, decimals)
+    ("WTMP", 1),
+    ("ATMP", 1),
+    ("WSPD", 0),
+    ("PRES", 1),
+    ("WVHT", 1),
 ]
+TEXT = {
+    "en": dict(buoy="Buoy", qc="automatic quality control",
+               aria="latest readings and automatic quality control",
+               rt="NOAA NDBC realtime · last record", last="last", to="to",
+               week="Last 7 days: {n} values flagged, {e} event{s}", latest="latest",
+               foot="Flags set by deterministic rules (QARTOD scheme) · rebuilt daily by GitHub Actions",
+               labels={"WTMP": "Water", "ATMP": "Air", "WSPD": "Wind", "PRES": "Pressure", "WVHT": "Waves"},
+               flags={"suspect": "suspect", "fail": "fail"}, plural="s"),
+    "pt": dict(buoy="Boia", qc="controle de qualidade automático",
+               aria="últimas leituras e controle de qualidade automático",
+               rt="NOAA NDBC em tempo real · último registro", last="últimas", to="a",
+               week="Últimos 7 dias: {n} valores sinalizados, {e} evento{s}", latest="último",
+               foot="Flags por regras determinísticas (padrão QARTOD) · atualizado todo dia pelo "
+                    "GitHub Actions",
+               labels={"WTMP": "Água", "ATMP": "Ar", "WSPD": "Vento", "PRES": "Pressão", "WVHT": "Ondas"},
+               flags={"suspect": "suspeito", "fail": "falha"}, plural="s",
+               tests={"spike": "pico", "flat_line": "linha plana", "gross_range": "fora da faixa",
+                      "gap": "lacuna"}),
+}
 FLAG_COLORS = {Flag.GOOD: "#2da44e", Flag.SUSPECT: "#d29922", Flag.FAIL: "#cf222e"}
 W, H = 540, 262
 UNIT_LABELS = {"degC": "°C", "degT": "°"}
@@ -43,8 +62,9 @@ def _esc(s: str) -> str:
 
 
 def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str = "",
-               hours: int = 72) -> str:
+               hours: int = 72, lang: str = "en") -> str:
     """``plot`` defaults to the variable of the latest event in the window (so its flags show), else PRES."""
+    tx = TEXT[lang]
     s = result.series
     if not s.times:
         raise ValueError("empty series")
@@ -52,10 +72,10 @@ def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str
     if not plot:
         in_window = [e for e in events if e.end >= last - timedelta(hours=hours) and e.variable in s.values]
         plot = max(in_window, key=lambda e: e.end).variable if in_window else "PRES"
-    title = title or f"Buoy {s.station}"
+    title = title or f"{tx['buoy']} {s.station}"
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img"'
-        f' aria-label="{_esc(title)}: latest readings and automatic quality control">',
+        f' aria-label="{_esc(title)}: {tx["aria"]}">',
         "<style>"
         "text{font:13px -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;fill:#1f2328}"
         ".t{font-weight:600;font-size:15px}.m{fill:#59636e;font-size:11px}.v{font-size:17px;font-weight:600;"
@@ -72,13 +92,14 @@ def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str
         "</style>",
         f'<rect class="bg" x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="8"/>',
         '<circle class="live" cx="20" cy="24" r="5" fill="#2da44e"/>',
-        f'<text class="t" x="34" y="29">{_esc(title)}: automatic quality control</text>',
-        f'<text class="m" x="20" y="48">NOAA NDBC realtime · last record {last:%Y-%m-%d %H:%M} UTC</text>',
+        f'<text class="t" x="34" y="29">{_esc(title)}: {tx["qc"]}</text>',
+        f'<text class="m" x="20" y="48">{tx["rt"]} {last:%Y-%m-%d %H:%M} UTC</text>',
     ]
 
     # latest readings
     x = 20
-    for var, label, dec in READINGS:
+    for var, dec in READINGS:
+        label = tx["labels"][var]
         got = _latest(result, var)
         if got is None:
             continue
@@ -112,8 +133,8 @@ def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str
             f'<line class="ax" x1="{px0}" y1="{py1 + 4}" x2="{px1}" y2="{py1 + 4}"/>',
             f'<polyline class="ln draw" pathLength="1000" fill="none" stroke-width="1.6" points="{line}"/>',
             f'<text class="m" x="{px0}" y="{py0 - 6}">{plot} ({_esc(_unit(s.units.get(plot, "")))}), '
-            f"last {hours} h · "
-            f"{lo:.1f} to {hi:.1f}</text>",
+            f"{tx['last']} {hours} h · "
+            f"{lo:.1f} {tx['to']} {hi:.1f}</text>",
         ]
         for t, v, f in pts:
             if f in (Flag.SUSPECT, Flag.FAIL):
@@ -125,14 +146,15 @@ def status_svg(result: QCResult, events: list[Event], title: str = "", plot: str
     recent = [e for e in events if e.end >= week]
     flagged = sum(1 for fl in result.flags.values() for i, f in enumerate(fl)
                   if f in (Flag.SUSPECT, Flag.FAIL) and s.times[i] >= week)
-    summary = f"Last 7 days: {flagged} values flagged, {len(recent)} event{'s' if len(recent) != 1 else ''}"
+    summary = tx["week"].format(n=flagged, e=len(recent), s=tx["plural"] if len(recent) != 1 else "")
     if recent:
         e = max(recent, key=lambda e: e.end)
-        summary += f" · latest: {e.variable} {', '.join(e.tests)} ({e.worst.name.lower()})"
+        worst = e.worst.name.lower()
+        tests = ', '.join(tx.get('tests', {}).get(t, t) for t in e.tests)
+        summary += f" · {tx['latest']}: {e.variable} {tests} ({tx['flags'].get(worst, worst)})"
     parts += [
         f'<text x="20" y="{H - 30}">{_esc(summary)}</text>',
-        f'<text class="m" x="20" y="{H - 12}">Flags set by deterministic rules (QARTOD scheme) · '
-        "rebuilt daily by GitHub Actions</text>",
+        f'<text class="m" x="20" y="{H - 12}">{tx["foot"]}</text>',
         "</svg>",
     ]
     return "".join(parts)
