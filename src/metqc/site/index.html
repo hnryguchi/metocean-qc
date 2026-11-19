@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>metocean-qc</title>
+<meta name="description" content="Controle de qualidade automático, todos os dias, em boias reais da NOAA. | Daily automatic quality control on real NOAA buoys.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23062a4a'/%3E%3Cpath d='M4 21l5-4 4 3 5-9 4 5 6-5' fill='none' stroke='%232dd4bf' stroke-width='2.6' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='11' r='3.2' fill='none' stroke='%23f5a50a' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="topbar">
+      <p class="eyebrow">metocean-qc · NOAA NDBC</p>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="pt">PT</button><button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+    <h1 data-i18n="title"></h1>
+    <p class="lede"><span data-i18n="lede"></span>
+      <span class="updated"><span data-i18n="lastRecord"></span> <b id="last-date">…</b> · <span data-i18n="rebuilt"></span></span></p>
+    <div class="kpis">
+      <div class="kpi"><span class="num" id="kpi-records">0</span><span class="lbl" data-i18n="kpiRecords"></span></div>
+      <div class="kpi"><span class="num" id="kpi-flagged">0</span><span class="lbl" data-i18n="kpiFlagged"></span></div>
+      <div class="kpi"><span class="num" id="kpi-events">0</span><span class="lbl" data-i18n="kpiEvents"></span></div>
+    </div>
+  </div>
+  <svg class="waves" viewBox="0 0 2880 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="w w1" d="M0 60 Q 360 20 720 60 T 1440 60 T 2160 60 T 2880 60 V120 H0 Z"/>
+    <path class="w w2" d="M0 72 Q 360 108 720 72 T 1440 72 T 2160 72 T 2880 72 V120 H0 Z"/>
+    <path class="w w3" d="M0 88 Q 360 66 720 88 T 1440 88 T 2160 88 T 2880 88 V120 H0 Z"/>
+  </svg>
+</header>
+
+<main>
+  <section>
+    <h2 data-i18n="buoysTitle"></h2>
+    <p class="hint" data-i18n="buoysHint"></p>
+    <div id="cards" class="cards"></div>
+  </section>
+
+  <section class="split">
+    <div id="map" class="map" role="region" aria-label="Mapa / Map"></div>
+    <div class="facts" id="facts"></div>
+  </section>
+
+  <section>
+    <h2 id="chart-title"></h2>
+    <p class="hint" data-i18n="chartHint"></p>
+    <div class="tabs" id="tabs" role="group"></div>
+    <div id="chart" class="chart"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section>
+    <h2 id="events-title"></h2>
+    <div class="table-wrap"><table id="events"><thead><tr>
+      <th data-i18n="thVar"></th><th data-i18n="thStart"></th><th data-i18n="thEnd"></th><th data-i18n="thTests"></th><th data-i18n="thValues"></th><th data-i18n="thFlag"></th>
+    </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2 data-i18n="testsTitle"></h2>
+    <p class="hint" data-i18n="testsHint"></p>
+    <div class="flags-grid" id="tests"></div>
+  </section>
+
+  <section class="method">
+    <h2 data-i18n="aboutTitle"></h2>
+    <ul>
+      <li data-i18n-html="aboutSource"></li>
+      <li data-i18n-html="aboutFlags"></li>
+      <li data-i18n-html="aboutLlm"></li>
+      <li data-i18n-html="aboutCode"></li>
+    </ul>
+    <p class="small" id="generated"></p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.33.0/plotly.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

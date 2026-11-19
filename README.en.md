@@ -20,7 +20,9 @@ in charge of the flags, and uses the other variables recorded at the same time t
 ## Running every day
 
 A scheduled GitHub Action fetches the latest NOAA data for three buoys, runs the deterministic tests (no LLM)
-and publishes the results to [hnryguchi.github.io/metocean-qc/](https://hnryguchi.github.io/metocean-qc/):
+and publishes an **interactive dashboard** at [hnryguchi.github.io/metocean-qc](https://hnryguchi.github.io/metocean-qc/):
+buoy map, latest readings with flags, a time series per variable with flagged points and gaps, an events table
+and a description of the tests (PT/EN). The site is built by `metqc site`.
 
 <a href="https://hnryguchi.github.io/metocean-qc/"><img src="https://hnryguchi.github.io/metocean-qc/41010/status.svg" alt="Buoy 41010: latest readings, 72-hour chart and QC flags from today's run" width="540"></a>
 
@@ -106,6 +108,8 @@ src/metqc/
   review.py    optional LLM reviewer (Claude), prompt and JSON schema
   report.py    JSON and Markdown reports
   card.py      SVG status card (latest readings, 72 h chart with flagged points)
+  site.py      static dashboard: QC per station, browser JSON, reports and cards
+  site/        dashboard front end (Plotly + Leaflet)
   cli.py       metqc fetch / metqc check [--card]
 tests/         pytest; real NDBC sample + clearly labelled synthetic series; fake LLM client
 ```

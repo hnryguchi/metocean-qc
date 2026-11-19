@@ -3,7 +3,13 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-78.478, 28.86] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -78.478,
+          28.86
+        ]
+      },
       "properties": {
         "station": "41010",
         "name": "Canaveral East, 120 NM east of Cape Canaveral",
@@ -11,12 +17,19 @@
         "used_for": "README results, test fixture, daily live run",
         "data": "https://www.ndbc.noaa.gov/station_page.php?station=41010",
         "marker-color": "#0969da",
-        "marker-symbol": "harbor"
+        "marker-symbol": "harbor",
+        "short_name": "Cabo Canaveral"
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-70.651, 42.346] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.651,
+          42.346
+        ]
+      },
       "properties": {
         "station": "44013",
         "name": "Boston, 16 NM east of Boston, MA",
@@ -24,12 +37,19 @@
         "used_for": "README results, daily live run",
         "data": "https://www.ndbc.noaa.gov/station_page.php?station=44013",
         "marker-color": "#0969da",
-        "marker-symbol": "harbor"
+        "marker-symbol": "harbor",
+        "short_name": "Boston"
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-122.408, 36.787] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.408,
+          36.787
+        ]
+      },
       "properties": {
         "station": "46042",
         "name": "Monterey, 27 NM WNW of Monterey, CA",
@@ -37,7 +57,8 @@
         "used_for": "README results, daily live run",
         "data": "https://www.ndbc.noaa.gov/station_page.php?station=46042",
         "marker-color": "#0969da",
-        "marker-symbol": "harbor"
+        "marker-symbol": "harbor",
+        "short_name": "Monterey"
       }
     }
   ]

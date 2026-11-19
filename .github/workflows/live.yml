@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["src/**", "site/**", ".github/workflows/live.yml"]
+    paths: ["src/**", "stations.geojson", ".github/workflows/live.yml"]
 
 permissions:
   contents: read
@@ -26,37 +26,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install .
-      - name: Fetch real NDBC data and run deterministic QC (no LLM)
+      - name: Fetch real NDBC data
         run: |
-          mkdir -p dist
-          declare -A NAMES=([41010]="Buoy 41010 · off Cape Canaveral" [44013]="Buoy 44013 · off Boston" [46042]="Buoy 46042 · Monterey Bay")
-          declare -A NOMES=([41010]="Boia 41010 · Cabo Canaveral" [44013]="Boia 44013 · Boston" [46042]="Boia 46042 · Monterey")
+          mkdir -p data
           for s in 41010 44013 46042; do
-            if metqc fetch "$s" -o "data/$s.txt"; then
-              metqc check "data/$s.txt" --out "dist/$s" --card "dist/$s/status.svg" --title "${NAMES[$s]}" || echo "QC failed for $s"
-              metqc check "data/$s.txt" --out "dist/$s/pt" --card "dist/$s/status-pt.svg" --title "${NOMES[$s]}" --lang pt --brand || true
-            else
-              echo "::warning::NDBC fetch failed for $s; skipping it today"
-            fi
+            metqc fetch "$s" -o "data/$s.txt" || echo "::warning::NDBC fetch failed for $s; skipping it today"
           done
-      - name: Assemble page
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          dist = Path("dist")
-          blocks = []
-          for s in ("41010", "44013", "46042"):
-              if (dist / s / "status.svg").exists():
-                  blocks.append(
-                      f'<img src="{s}/status.svg" alt="Buoy {s}: latest readings and QC flags">'
-                      f'<div class="links">Report: <a href="{s}/qc_report.md">Markdown</a> · '
-                      f'<a href="{s}/qc_report.json">JSON</a> · '
-                      f'<a href="https://www.ndbc.noaa.gov/station_page.php?station={s}">NDBC station</a></div>'
-                  )
-          html = Path("site/index.html").read_text(encoding="utf-8")
-          body = "\n".join(blocks) or "<p>No station could be fetched today.</p>"
-          (dist / "index.html").write_text(html.replace("<!--STATIONS-->", body), encoding="utf-8")
-          PY
+      - name: Run deterministic QC (no LLM) and build the dashboard
+        run: metqc site --data data --stations stations.geojson --out dist
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

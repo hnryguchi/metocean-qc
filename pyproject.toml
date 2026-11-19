@@ -22,6 +22,9 @@ metqc = "metqc.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+metqc = ["site/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
