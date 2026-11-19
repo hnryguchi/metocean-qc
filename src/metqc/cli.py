@@ -32,6 +32,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="LLM second opinion on events (default: none; 'claude' calls a paid API)")
     c.add_argument("--max-reviews", type=int, default=10, help="cap on reviewed events per run")
     c.add_argument("--model", default="claude-opus-5-5")
+    c.add_argument("--card", type=Path, help="also write an SVG status card (latest readings, 72 h chart)")
+    c.add_argument("--title", default="", help="title for the status card")
 
     args = p.parse_args(argv)
     if args.cmd == "fetch":
@@ -69,6 +71,12 @@ def main(argv: list[str] | None = None) -> int:
             reviews.append(reviewer.review(ev, series))
 
     paths = write_reports(args.out, result, events, reviews)
+    if args.card:
+        from .card import status_svg
+
+        args.card.parent.mkdir(parents=True, exist_ok=True)
+        args.card.write_text(status_svg(result, events, title=args.title), encoding="utf-8")
+        paths.append(args.card)
     print(f"{series.station}: {len(series.times)} records, {len(result.findings)} findings, "
           f"{len(events)} events -> " + ", ".join(str(x) for x in paths))
     return 0

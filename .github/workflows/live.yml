@@ -1,0 +1,70 @@
+name: Live QC
+
+on:
+  schedule:
+    - cron: "15 6 * * *"   # daily
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["src/**", "site/**", ".github/workflows/live.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install .
+      - name: Fetch real NDBC data and run deterministic QC (no LLM)
+        run: |
+          mkdir -p dist
+          declare -A NAMES=([41010]="Buoy 41010 · off Cape Canaveral" [44013]="Buoy 44013 · off Boston" [46042]="Buoy 46042 · Monterey Bay")
+          for s in 41010 44013 46042; do
+            if metqc fetch "$s" -o "data/$s.txt"; then
+              metqc check "data/$s.txt" --out "dist/$s" --card "dist/$s/status.svg" --title "${NAMES[$s]}" || echo "QC failed for $s"
+            else
+              echo "::warning::NDBC fetch failed for $s; skipping it today"
+            fi
+          done
+      - name: Assemble page
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          dist = Path("dist")
+          blocks = []
+          for s in ("41010", "44013", "46042"):
+              if (dist / s / "status.svg").exists():
+                  blocks.append(
+                      f'<img src="{s}/status.svg" alt="Buoy {s}: latest readings and QC flags">'
+                      f'<div class="links">Report: <a href="{s}/qc_report.md">Markdown</a> · '
+                      f'<a href="{s}/qc_report.json">JSON</a> · '
+                      f'<a href="https://www.ndbc.noaa.gov/station_page.php?station={s}">NDBC station</a></div>'
+                  )
+          html = Path("site/index.html").read_text(encoding="utf-8")
+          body = "\n".join(blocks) or "<p>No station could be fetched today.</p>"
+          (dist / "index.html").write_text(html.replace("<!--STATIONS-->", body), encoding="utf-8")
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

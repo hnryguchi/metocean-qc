@@ -1,0 +1,9 @@
+{
+  "name": "metocean-qc",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "pip install -e '.[dev]' && metqc fetch 41010 && metqc check data/41010.txt --out reports/41010 --card reports/41010/status.svg",
+  "customizations": {
+    "codespaces": { "openFiles": ["reports/41010/qc_report.md", "README.md"] },
+    "vscode": { "extensions": ["ms-python.python", "charliermarshall.ruff"] }
+  }
+}
