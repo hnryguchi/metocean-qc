@@ -45,3 +45,13 @@ def test_portuguese_card(ndbc_text):
     svg = status_svg(result, group_events(result), lang="pt")
     ET.fromstring(svg)
     assert "Boia 41010: controle de qualidade automático" in svg and "Água" in svg and "Últimos 7 dias" in svg
+
+
+def test_brand_palette(ndbc_text):
+    from metqc.card import brand
+
+    series = parse_ndbc(ndbc_text, station="41010")
+    result = run_qc(series)
+    svg = brand(status_svg(result, group_events(result), lang="pt"))
+    ET.fromstring(svg)
+    assert "#081a2e" in svg and "prefers-color-scheme" not in svg

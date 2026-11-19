@@ -35,6 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--card", type=Path, help="also write an SVG status card (latest readings, 72 h chart)")
     c.add_argument("--title", default="", help="title for the status card")
     c.add_argument("--lang", choices=["en", "pt"], default="en", help="status card language")
+    c.add_argument("--brand", action="store_true", help="fixed navy palette for the status card")
 
     args = p.parse_args(argv)
     if args.cmd == "fetch":
@@ -76,7 +77,12 @@ def main(argv: list[str] | None = None) -> int:
         from .card import status_svg
 
         args.card.parent.mkdir(parents=True, exist_ok=True)
-        args.card.write_text(status_svg(result, events, title=args.title, lang=args.lang), encoding="utf-8")
+        svg = status_svg(result, events, title=args.title, lang=args.lang)
+        if args.brand:
+            from .card import brand
+
+            svg = brand(svg)
+        args.card.write_text(svg, encoding="utf-8")
         paths.append(args.card)
     print(f"{series.station}: {len(series.times)} records, {len(result.findings)} findings, "
           f"{len(events)} events -> " + ", ".join(str(x) for x in paths))
