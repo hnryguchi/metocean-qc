@@ -1,116 +1,116 @@
 # metocean-qc
 
-**English** · [Português](README.pt-BR.md)
+**Português** · [English](README.en.md)
 
-Quality control for meteorological and ocean time series from buoys and weather stations.
-Deterministic tests decide the flags; an **optional** LLM gives a second opinion on each event,
-whether it looks like a sensor fault, a real environmental event, or cannot be told, and a person decides.
+Controle de qualidade de séries temporais meteorológicas e oceanográficas de boias e estações meteorológicas.
+Testes determinísticos decidem os flags; um LLM **opcional** dá uma segunda opinião sobre cada evento
+(falha de sensor, evento ambiental real ou indeterminado), e a decisão final é de uma pessoa.
 
 [![CI](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml/badge.svg)](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml) [![Live QC](https://github.com/hnryguchi/metocean-qc/actions/workflows/live.yml/badge.svg)](https://github.com/hnryguchi/metocean-qc/actions/workflows/live.yml)
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/hnryguchi/metocean-qc?quickstart=1)
+[![Abrir no GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/hnryguchi/metocean-qc?quickstart=1)
 
-## Why
+## Motivação
 
-Station data is full of things that look wrong: frozen sensors, single-point jumps, transmission gaps.
-Some of them are real. A pressure drop that comes with rising wind is a front, not a broken barometer.
-Fixed thresholds catch the first kind well and the second kind badly. This tool keeps the thresholds
-in charge of the flags, and uses the other variables recorded at the same time to explain each alert.
+Dados de estações estão cheios de valores que parecem errados: sensores travados, saltos de um único ponto, falhas de transmissão.
+Alguns deles são reais. Uma queda de pressão acompanhada de aumento do vento é uma frente, não um barômetro quebrado.
+Limiares fixos detectam bem o primeiro tipo e mal o segundo. Esta ferramenta mantém os limiares como única fonte
+dos flags e usa as demais variáveis registradas no mesmo instante para explicar cada alerta.
 
-## Running every day
+## Execução diária
 
-A scheduled GitHub Action fetches the latest NOAA data for three buoys, runs the deterministic tests (no LLM)
-and publishes the results to [hnryguchi.github.io/metocean-qc/](https://hnryguchi.github.io/metocean-qc/):
+Uma GitHub Action agendada baixa os dados mais recentes da NOAA para três boias, roda os testes determinísticos
+(sem LLM) e publica os resultados em [hnryguchi.github.io/metocean-qc/](https://hnryguchi.github.io/metocean-qc/):
 
-<a href="https://hnryguchi.github.io/metocean-qc/"><img src="https://hnryguchi.github.io/metocean-qc/41010/status.svg" alt="Buoy 41010: latest readings, 72-hour chart and QC flags from today's run" width="540"></a>
+<a href="https://hnryguchi.github.io/metocean-qc/"><img src="https://hnryguchi.github.io/metocean-qc/41010/status-pt.svg" alt="Boia 41010: últimas leituras, gráfico de 72 horas e flags de QC da execução de hoje" width="540"></a>
 
-The buoys are in [`stations.geojson`](stations.geojson), which GitHub shows as an interactive map.
+As boias estão em [`stations.geojson`](stations.geojson), que o GitHub renderiza como mapa interativo.
 
-**Try it without installing anything:** the Codespaces button above opens a ready environment that
-fetches buoy 41010 and writes the report and card on start.
+**Teste sem instalar nada:** o botão do Codespaces acima abre um ambiente pronto que baixa a boia 41010
+e gera o relatório e o card na inicialização.
 
-## How it works
+## Como funciona
 
 ```mermaid
 flowchart LR
-    A[NOAA NDBC file or CSV] --> B[Parse and sort]
-    B --> C[Deterministic tests<br/>gross range, spike, flat line, gaps]
-    C --> D[Per-value flags<br/>QARTOD scheme]
-    C --> E[Group findings into events]
-    E -->|optional, off by default| F[LLM second opinion<br/>JSON schema output]
-    D --> G[Reports<br/>JSON + Markdown]
+    A[Arquivo NOAA NDBC ou CSV] --> B[Parsing e ordenação]
+    B --> C[Testes determinísticos<br/>gross range, spike, flat line, lacunas]
+    C --> D[Flags por valor<br/>esquema QARTOD]
+    C --> E[Agrupamento de achados em eventos]
+    E -->|opcional, desligado por padrão| F[Segunda opinião do LLM<br/>saída em JSON schema]
+    D --> G[Relatórios<br/>JSON + Markdown]
     E --> G
     F --> G
 ```
 
-- **Flags** follow the [IOOS QARTOD](https://ioos.noaa.gov/project/qartod/) scheme: 1 good, 2 not evaluated, 3 suspect, 4 fail, 9 missing. The test families are simplified versions of QARTOD tests. This is not a certified QARTOD implementation.
-- **Tests**:
-  - gross range (physical limits → fail, climatological limits → suspect);
-  - spike (deviation from the neighbour mean, flagged only at the local maximum so the values next to a spike are not flagged);
-  - flat line (unchanged value for N hours);
-  - gaps between records.
-- **Events** merge nearby findings of the same variable, so a frozen sensor is one alert, not 80.
-- **LLM review** (`--review claude`) sends each event with a ±6 h window of *all* variables and asks for a verdict, confidence, evidence and a recommended action. Output is constrained to a JSON schema. A refusal becomes "uncertain, needs human review". It never changes flags.
+- **Flags** seguem o esquema do [IOOS QARTOD](https://ioos.noaa.gov/project/qartod/): 1 bom, 2 não avaliado, 3 suspeito, 4 falha, 9 ausente. As famílias de testes são versões simplificadas dos testes QARTOD. Esta não é uma implementação certificada do QARTOD.
+- **Testes**:
+  - gross range (limites físicos → falha, limites climatológicos → suspeito);
+  - spike (desvio em relação à média dos vizinhos, sinalizado apenas no máximo local, para que os valores adjacentes a um spike não sejam sinalizados);
+  - flat line (valor inalterado por N horas);
+  - lacunas entre registros.
+- **Eventos** agrupam achados próximos da mesma variável, de modo que um sensor travado gera um alerta, não 80.
+- **Revisão por LLM** (`--review claude`) envia cada evento com uma janela de ±6 h de *todas* as variáveis e solicita veredito, grau de confiança, evidências e ação recomendada. A saída é restrita a um JSON schema. Uma recusa vira "incerto, requer revisão humana". A revisão nunca altera os flags.
 
-## Quick start
+## Início rápido
 
 ```bash
-pip install -e .                       # no runtime dependencies (standard library only)
-metqc fetch 41010                      # last ~45 days from NOAA NDBC buoy 41010 (public domain)
+pip install -e .                       # sem dependências de runtime (apenas biblioteca padrão)
+metqc fetch 41010                      # últimos ~45 dias da boia 41010 do NOAA NDBC (domínio público)
 metqc check data/41010.txt --out reports/41010
-metqc check data/41010.txt --out reports/41010 --card reports/41010/status.svg   # + SVG status card
+metqc check data/41010.txt --out reports/41010 --card reports/41010/status.svg   # + card SVG de status
 ```
 
-CSV input (one ISO-8601 time column, one column per variable; `temperatura`, `umidade`, `pressao`, `temperature`, `humidity` and `pressure` are mapped automatically):
+Entrada CSV (uma coluna de tempo em ISO-8601, uma coluna por variável; `temperatura`, `umidade`, `pressao`, `temperature`, `humidity` e `pressure` são mapeadas automaticamente):
 
 ```bash
 metqc check station.csv --source csv --time-column timestamp
 ```
 
-Optional LLM second opinion (**paid API**, capped at `--max-reviews`, default 10 events per run):
+Segunda opinião opcional do LLM (**API paga**, limitada por `--max-reviews`, padrão de 10 eventos por execução):
 
 ```bash
 pip install -e ".[llm]"
-export ANTHROPIC_API_KEY=...           # never commit keys; the code reads them from the environment
+export ANTHROPIC_API_KEY=...           # nunca versione chaves; o código as lê do ambiente
 metqc check data/41010.txt --review claude --max-reviews 5
 ```
 
-## Results on real data
+## Resultados com dados reais
 
-Tested on NOAA NDBC realtime files fetched on 2026-11-19 (about 45 days, 10-minute records):
+Testado com arquivos realtime do NOAA NDBC baixados em 2026-11-19 (cerca de 45 dias, registros a cada 10 minutos):
 
-| Station | Records | Values flagged | Events | What the events were |
+| Estação | Registros | Valores sinalizados | Eventos | O que foram os eventos |
 |---|---|---|---|---|
-| 41010 (off Cape Canaveral) | 6,347 | 12 | 2 | water temperature unchanged for 24 h (suspect), one 9 h transmission gap |
-| 44013 (Boston approach) | 6,345 | 3 | 3 | two single-point air temperature and dew point spikes (suspect), one gap |
-| 46042 (Monterey Bay) | 6,343 | 3 | 3 | dew point and wave height spikes (suspect), one gap |
+| 41010 (ao largo de Cape Canaveral) | 6,347 | 12 | 2 | temperatura da água inalterada por 24 h (suspeito), uma lacuna de transmissão de 9 h |
+| 44013 (aproximação de Boston) | 6,345 | 3 | 3 | dois spikes de um único ponto em temperatura do ar e ponto de orvalho (suspeito), uma lacuna |
+| 46042 (Baía de Monterey) | 6,343 | 3 | 3 | spikes em ponto de orvalho e altura de onda (suspeito), uma lacuna |
 
-**The first version was wrong, and the data showed it.** Station 41010 produced 97 flagged values,
-including FAIL flags for water temperature "frozen" for 12 to 25 hours. Looking at the series showed
-these were not faults: NDBC reports water temperature in 0.1 °C and wind speed in whole m/s, and a
-stable tropical sea or a steady trade wind repeats the same value for many hours. The flat-line
-thresholds were retuned to the sensor resolution (e.g. water temperature: suspect after 24 h, fail
-after 72 h), and the reasoning is documented in [`src/metqc/config.py`](src/metqc/config.py).
+**A primeira versão gerava falsos positivos, e os dados os expuseram.** A estação 41010 gerou 97 valores sinalizados,
+incluindo flags FAIL para temperatura da água "travada" por 12 a 25 horas. A inspeção da série mostrou que não
+eram falhas: o NDBC reporta a temperatura da água com resolução de 0,1 °C e a velocidade do vento em m/s inteiros, e
+um mar tropical estável ou um alísio constante repete o mesmo valor por muitas horas. Os limiares de flat line
+foram reajustados à resolução do sensor (por exemplo, temperatura da água: suspeito após 24 h, falha
+após 72 h), e o raciocínio está documentado em [`src/metqc/config.py`](src/metqc/config.py).
 
-Example report: [`examples/41010/qc_report.md`](examples/41010/qc_report.md).
+Relatório de exemplo: [`examples/41010/qc_report.md`](examples/41010/qc_report.md).
 
-## Project layout
+## Estrutura do projeto
 
 ```
 src/metqc/
-  models.py    Series, Flag (QARTOD values), Finding
-  sources.py   NDBC realtime parser and fetcher, CSV reader
-  config.py    default limits per variable, with the reasoning behind them
-  rules.py     deterministic tests (no side effects)
-  engine.py    runs tests, keeps the worst flag per value, groups events
-  review.py    optional LLM reviewer (Claude), prompt and JSON schema
-  report.py    JSON and Markdown reports
-  card.py      SVG status card (latest readings, 72 h chart with flagged points)
+  models.py    Series, Flag (valores QARTOD), Finding
+  sources.py   parser e downloader de arquivos realtime do NDBC, leitor de CSV
+  config.py    limites padrão por variável, com a justificativa de cada um
+  rules.py     testes determinísticos (sem efeitos colaterais)
+  engine.py    executa os testes, mantém o pior flag por valor, agrupa eventos
+  review.py    revisor opcional por LLM (Claude), prompt e JSON schema
+  report.py    relatórios em JSON e Markdown
+  card.py      card SVG de status (últimas leituras, gráfico de 72 h com pontos sinalizados)
   cli.py       metqc fetch / metqc check [--card]
-tests/         pytest; real NDBC sample + clearly labelled synthetic series; fake LLM client
+tests/         pytest; amostra real do NDBC + séries sintéticas claramente identificadas; cliente LLM falso
 ```
 
-## Development
+## Desenvolvimento
 
 ```bash
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
@@ -118,18 +118,18 @@ pip install -e ".[dev]"
 pytest -q && ruff check src tests
 ```
 
-CI runs lint and tests on Python 3.10 to 3.13. No test calls a paid API: the LLM layer is tested with a fake client.
-A live `--review claude` run has not been executed yet (no API key on the development machine). The request
-shape was checked against the installed `anthropic` SDK signature only.
+O CI roda lint e testes em Python 3.10 a 3.13. Nenhum teste chama API paga: a camada de LLM é testada com um cliente falso.
+Uma execução real com `--review claude` ainda não foi feita (não há chave de API na máquina de desenvolvimento). O formato
+da requisição foi conferido apenas contra a assinatura do SDK `anthropic` instalado.
 
-## Limitations and next steps
+## Limitações e próximos passos
 
-- Default thresholds are global and broad. Real use needs per-station, per-season limits (e.g. from climatology).
-- No rate-of-change test or multi-variate tests yet; the cross-variable reasoning is only in the optional LLM step.
-- Next: Brazilian sources (INMET automatic stations, PNBOIA buoys), a configurable limits file, and an evaluation
-  set of human-labelled events to measure whether the LLM second opinion actually helps.
+- Os limiares padrão são globais e amplos. O uso real exige limites por estação e por época do ano (por exemplo, derivados de climatologia).
+- Ainda não há teste de taxa de variação nem testes multivariados; o raciocínio entre variáveis existe apenas na etapa opcional de LLM.
+- Próximos passos: fontes brasileiras (estações automáticas do INMET, boias do PNBOIA), arquivo de limites configurável e um conjunto
+  de avaliação com eventos rotulados por pessoas, para medir se a segunda opinião do LLM de fato ajuda.
 
-## Data and license
+## Dados e licença
 
-- NOAA NDBC data is public domain (U.S. Government work). The test fixture is a 150-record excerpt of station 41010.
-- Code: MIT. Author: Henry Noguchi.
+- Os dados do NOAA NDBC são de domínio público (obra do governo dos EUA). A fixture de teste é um trecho de 150 registros da estação 41010.
+- Código: MIT. Autor: Henry Noguchi.
