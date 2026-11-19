@@ -37,7 +37,19 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--lang", choices=["en", "pt"], default="en", help="status card language")
     c.add_argument("--brand", action="store_true", help="fixed navy palette for the status card")
 
+    w = sub.add_parser("site", help="run QC on every station and build the static dashboard")
+    w.add_argument("--data", type=Path, default=Path("data"), help="folder with <station>.txt NDBC files")
+    w.add_argument("--stations", type=Path, default=Path("stations.geojson"))
+    w.add_argument("--out", type=Path, default=Path("dist"))
+
     args = p.parse_args(argv)
+    if args.cmd == "site":
+        from .site import build_site
+
+        payload = build_site(args.data, args.stations, args.out)
+        print(f"site written to {args.out} ({len(payload['stations'])} stations)")
+        return 0 if payload["stations"] else 1
+
     if args.cmd == "fetch":
         out = args.output or Path("data") / f"{args.station}.txt"
         out.parent.mkdir(parents=True, exist_ok=True)

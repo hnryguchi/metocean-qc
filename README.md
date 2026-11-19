@@ -20,7 +20,9 @@ dos flags e usa as demais variáveis registradas no mesmo instante para explicar
 ## Execução diária
 
 Uma GitHub Action agendada baixa os dados mais recentes da NOAA para três boias, roda os testes determinísticos
-(sem LLM) e publica os resultados em [hnryguchi.github.io/metocean-qc/](https://hnryguchi.github.io/metocean-qc/):
+(sem LLM) e publica um **dashboard interativo** em [hnryguchi.github.io/metocean-qc](https://hnryguchi.github.io/metocean-qc/):
+mapa das boias, últimas leituras com flag, série temporal de cada variável com os pontos sinalizados e as lacunas,
+tabela de eventos e descrição dos testes (PT/EN). O comando que gera o site é `metqc site`.
 
 <a href="https://hnryguchi.github.io/metocean-qc/"><img src="https://hnryguchi.github.io/metocean-qc/41010/status-pt.svg" alt="Boia 41010: últimas leituras, gráfico de 72 horas e flags de QC da execução de hoje" width="540"></a>
 
@@ -106,6 +108,8 @@ src/metqc/
   review.py    revisor opcional por LLM (Claude), prompt e JSON schema
   report.py    relatórios em JSON e Markdown
   card.py      card SVG de status (últimas leituras, gráfico de 72 h com pontos sinalizados)
+  site.py      dashboard estático: QC por estação, JSON para o navegador, relatórios e cards
+  site/        front-end do dashboard (Plotly + Leaflet)
   cli.py       metqc fetch / metqc check [--card]
 tests/         pytest; amostra real do NDBC + séries sintéticas claramente identificadas; cliente LLM falso
 ```
