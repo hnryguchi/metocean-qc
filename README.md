@@ -1,10 +1,14 @@
 # metocean-qc
 
+**English** · [Português](README.pt-BR.md)
+
 Quality control for meteorological and ocean time series from buoys and weather stations.
 Deterministic tests decide the flags; an **optional** LLM gives a second opinion on each event,
 whether it looks like a sensor fault, a real environmental event, or cannot be told, and a person decides.
 
-[![CI](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml/badge.svg)](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml)
+[![CI](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml/badge.svg)](https://github.com/hnryguchi/metocean-qc/actions/workflows/ci.yml) [![Live QC](https://github.com/hnryguchi/metocean-qc/actions/workflows/live.yml/badge.svg)](https://github.com/hnryguchi/metocean-qc/actions/workflows/live.yml)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/hnryguchi/metocean-qc?quickstart=1)
 
 ## Why
 
@@ -12,6 +16,18 @@ Station data is full of things that look wrong: frozen sensors, single-point jum
 Some of them are real. A pressure drop that comes with rising wind is a front, not a broken barometer.
 Fixed thresholds catch the first kind well and the second kind badly. This tool keeps the thresholds
 in charge of the flags, and uses the other variables recorded at the same time to explain each alert.
+
+## Running every day
+
+A scheduled GitHub Action fetches the latest NOAA data for three buoys, runs the deterministic tests (no LLM)
+and publishes the results to [hnryguchi.github.io/metocean-qc/](https://hnryguchi.github.io/metocean-qc/):
+
+<a href="https://hnryguchi.github.io/metocean-qc/"><img src="https://hnryguchi.github.io/metocean-qc/41010/status.svg" alt="Buoy 41010: latest readings, 72-hour chart and QC flags from today's run" width="540"></a>
+
+The buoys are in [`stations.geojson`](stations.geojson), which GitHub shows as an interactive map.
+
+**Try it without installing anything:** the Codespaces button above opens a ready environment that
+fetches buoy 41010 and writes the report and card on start.
 
 ## How it works
 
@@ -42,6 +58,7 @@ flowchart LR
 pip install -e .                       # no runtime dependencies (standard library only)
 metqc fetch 41010                      # last ~45 days from NOAA NDBC buoy 41010 (public domain)
 metqc check data/41010.txt --out reports/41010
+metqc check data/41010.txt --out reports/41010 --card reports/41010/status.svg   # + SVG status card
 ```
 
 CSV input (one ISO-8601 time column, one column per variable; `temperatura`, `umidade`, `pressao`, `temperature`, `humidity` and `pressure` are mapped automatically):
@@ -88,7 +105,8 @@ src/metqc/
   engine.py    runs tests, keeps the worst flag per value, groups events
   review.py    optional LLM reviewer (Claude), prompt and JSON schema
   report.py    JSON and Markdown reports
-  cli.py       metqc fetch / metqc check
+  card.py      SVG status card (latest readings, 72 h chart with flagged points)
+  cli.py       metqc fetch / metqc check [--card]
 tests/         pytest; real NDBC sample + clearly labelled synthetic series; fake LLM client
 ```
 
