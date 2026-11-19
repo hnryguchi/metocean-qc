@@ -28,7 +28,8 @@ def test_build_site_from_real_sample(tmp_path):
     payload = build_site(data, geo, out)
 
     assert [s["id"] for s in payload["stations"]] == ["41010"]  # 44013 skipped, not faked
-    for f in ("index.html", "app.js", "style.css", "stations.json", "41010/series.json", "41010/status.svg",
+    for f in ("index.html", "app.js", "style.css", "ocean3d.js", "stations.json", "41010/series.json",
+              "41010/status.svg",
               "41010/status-pt.svg", "41010/qc_report.json", "41010/qc_report.md"):
         assert (out / f).exists(), f
     st = payload["stations"][0]

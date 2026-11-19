@@ -1,7 +1,7 @@
 // metocean-qc dashboard (PT / EN). Reads stations.json and <id>/series.json produced by `metqc site`.
 const FLAG_COLORS = { good: "#2da44e", suspect: "#f5a50a", fail: "#e8231c", not_evaluated: "#8c959f", missing: "#8c959f" };
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const dark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+const dark = () => true; // brand theme is always dark
 const UNITS = { degC: "°C", degT: "°", sec: "s" };
 
 const I18N = {
@@ -33,6 +33,9 @@ const I18N = {
     aboutCode: "<b>Código:</b> <a href=\"https://github.com/hnryguchi/metocean-qc\">github.com/hnryguchi/metocean-qc</a> · Henry Noguchi.",
     built: (d) => `Gerado em ${d} UTC.`, loadError: "Não foi possível carregar os dados:",
     hoverFlag: "sinalizado", dateFmt: "%d/%m %H:%M",
+    hudWave: "altura de onda", hudWind: "vento", hudPres: "pressão", hudNow: "mar agora", hudReplay: "replay",
+    replayHint: "Reproduza os últimos ~45 dias: o mar 3D segue as ondas e o vento medidos.",
+    flagToast: (v, test, f) => `QC: ${v} · ${test} → ${f}`,
   },
   en: {
     title: "Automatic quality control on real ocean buoys",
@@ -61,6 +64,9 @@ const I18N = {
     aboutCode: "<b>Code:</b> <a href=\"https://github.com/hnryguchi/metocean-qc\">github.com/hnryguchi/metocean-qc</a> · Henry Noguchi.",
     built: (d) => `Built ${d} UTC.`, loadError: "Could not load data:",
     hoverFlag: "flagged", dateFmt: "%b %d %H:%M",
+    hudWave: "wave height", hudWind: "wind", hudPres: "pressure", hudNow: "sea now", hudReplay: "replay",
+    replayHint: "Replay the last ~45 days: the 3D sea follows the measured waves and wind.",
+    flagToast: (v, test, f) => `QC: ${v} · ${test} → ${f}`,
   },
 };
 
@@ -92,10 +98,10 @@ function countUp(el, target) {
 }
 
 function plotLayout(extra = {}) {
-  const fg = dark() ? "#e6f1fb" : "#0c1a2e", grid = dark() ? "#1f3550" : "#e3ecf3";
+  const fg = "#c6e2f3", grid = "#16324f";
   return Object.assign({
     paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-    font: { family: "Segoe UI, system-ui, sans-serif", color: fg, size: 12 },
+    font: { family: "Inter, system-ui, sans-serif", color: fg, size: 12 },
     margin: { l: 56, r: 16, t: 16, b: 40 }, xaxis: { gridcolor: grid }, yaxis: { gridcolor: grid, zeroline: false },
     hovermode: "closest", showlegend: false, separators: lang === "pt" ? ",." : ".,",
   }, extra);
@@ -140,10 +146,12 @@ function renderCards() {
 
 function renderMap() {
   map = L.map("map", { scrollWheelZoom: false }).setView([36, -95], 3);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 9, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 9, subdomains: "abcd", attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+  }).addTo(map);
   DATA.stations.forEach((s) => {
     const m = L.circleMarker([s.lat, s.lon], {
-      radius: 9, color: "#0c1a2e", weight: 1.5, fillColor: s.events_7d ? FLAG_COLORS.suspect : FLAG_COLORS.good, fillOpacity: 0.95,
+      radius: 9, color: "#e8f4fd", weight: 1.5, fillColor: s.events_7d ? FLAG_COLORS.suspect : FLAG_COLORS.good, fillOpacity: 0.95,
     }).addTo(map);
     m.on("click", () => select(s.id));
     markers[s.id] = m;
@@ -188,7 +196,7 @@ function renderTabs(ser) {
 function renderChart(ser) {
   const v = ser.variables[currentVar], t0 = Date.parse(ser.t0);
   const x = ser.minutes.map((m) => new Date(t0 + m * 60000).toISOString());
-  const grid = dark() ? "#1f3550" : "#e3ecf3";
+  const grid = "#16324f";
   const u = unit(v.unit);
   // Variables are sampled at different rates (e.g. waves hourly, wind every 10 min): plot only measured points,
   // and break the line only where the station had a real gap (> 3 h between measurements).
@@ -200,7 +208,7 @@ function renderChart(ser) {
     lx.push(x[i]); ly.push(val); prev = i;
   });
   const line = {
-    x: lx, y: ly, type: "scatter", mode: "lines", connectgaps: false, line: { color: dark() ? "#38bdf8" : "#0e7490", width: 1.4 },
+    x: lx, y: ly, type: "scatter", mode: "lines", connectgaps: false, line: { color: "#38bdf8", width: 1.4 },
     hovertemplate: `%{x|${t("dateFmt")}} UTC<br>%{y:.2f} ${u}<extra></extra>`,
   };
   const pts = (code, name) => {
@@ -217,8 +225,9 @@ function renderChart(ser) {
     x0: new Date(Date.parse(e.start) - pad).toISOString(), x1: new Date(Date.parse(e.end) + pad).toISOString(),
     fillcolor: e.variable === "*" ? "rgba(140,149,159,.3)" : "rgba(245,165,10,.25)",
   }));
+  baseShapes = shapes;
   const layout = plotLayout({
-    shapes, yaxis: { title: `${varLabel(currentVar)} (${u})`, gridcolor: grid, zeroline: false },
+    shapes: shapes.concat(cursorShape()), yaxis: { title: `${varLabel(currentVar)} (${u})`, gridcolor: grid, zeroline: false },
     xaxis: { type: "date", gridcolor: grid, rangeslider: { visible: true, thickness: 0.08 } },
   });
   $("chart-title").textContent = `${t("chartTitle")}: ${current.id} · ${current.name}`;
@@ -248,6 +257,7 @@ async function select(id, { animate = true, keepVar = false } = {}) {
   if (!keepVar || !ser.variables[currentVar]) currentVar = defaultVar(ser);
   renderTabs(ser); renderChart(ser); renderEvents(ser);
   history.replaceState(null, "", `#${id}`);
+  stopReplay(); $("scrub").value = 1000; setTime(ser.minutes.length - 1, { force: true });
 }
 
 function setLang(next) {
@@ -261,6 +271,73 @@ function setLang(next) {
     document.body.classList.remove("switching");
   }, reduceMotion ? 0 : 180);
 }
+
+// ---- live 3D sea + replay -------------------------------------------------------------------
+const ocean = window.Ocean3D ? Ocean3D.mount(document.querySelector(".hero")) : { set() {} };
+let baseShapes = [], cursorIdx = null, playing = false, lastRelayout = 0, lastFlagCheck = null, flagTimer = null;
+
+function nearest(ser, v, i, back = 18) {           // latest measured value at or before i (waves are hourly)
+  const col = ser.variables[v]; if (!col) return null;
+  for (let k = i; k >= Math.max(0, i - back); k--) if (col.values[k] !== null) return col.values[k];
+  return null;
+}
+function cursorShape() {
+  const ser = current && SERIES[current.id];
+  if (!ser || cursorIdx === null) return [];
+  const x = new Date(Date.parse(ser.t0) + ser.minutes[cursorIdx] * 60000).toISOString();
+  return [{ type: "line", xref: "x", yref: "paper", x0: x, x1: x, y0: 0, y1: 1, line: { color: "#2dd4bf", width: 2 } }];
+}
+function showFlag(ser, i0, i1) {
+  for (const [v, col] of Object.entries(ser.variables)) {
+    const hit = col.flagged.find(([i]) => i > i0 && i <= i1);
+    if (!hit) continue;
+    const when = Date.parse(ser.t0) + ser.minutes[hit[0]] * 60000, slack = 60 * 60000;
+    const ev = ser.events.find((e) => e.variable === v && Date.parse(e.start) - slack <= when && when <= Date.parse(e.end) + slack);
+    const f = hit[1] === 4 ? "fail" : "suspect", el = $("hud-flag");
+    el.textContent = t("flagToast")(varLabel(v), ev ? ev.tests.map(testLabel).join(", ") : "QC", t("flags")[f]);
+    el.className = `hud-flag ${f === "fail" ? "fail" : ""}`; el.hidden = false;
+    clearTimeout(flagTimer); flagTimer = setTimeout(() => { el.hidden = true; }, 2600);
+    return;
+  }
+}
+function setTime(i, { force = false } = {}) {
+  const ser = current && SERIES[current.id]; if (!ser) return;
+  i = Math.max(0, Math.min(ser.minutes.length - 1, i));
+  if (lastFlagCheck !== null && i > lastFlagCheck && !force) showFlag(ser, lastFlagCheck, i);
+  lastFlagCheck = i; cursorIdx = i;
+  const wave = nearest(ser, "WVHT", i), wind = nearest(ser, "WSPD", i, 6), pres = nearest(ser, "PRES", i, 6);
+  const live = i === ser.minutes.length - 1;
+  $("hud-title").textContent = `${live ? t("hudNow") : t("hudReplay")} · ${current.id} ${current.name}`;
+  $("hud-time").textContent = fmtTime(new Date(Date.parse(ser.t0) + ser.minutes[i] * 60000).toISOString());
+  $("hud-wave").textContent = wave === null ? "–" : `${fmt(wave)} m`;
+  $("hud-wind").textContent = wind === null ? "–" : `${fmt(wind)} m/s`;
+  $("hud-pres").textContent = pres === null ? "–" : fmt(pres, 0);
+  ocean.set({ waveHeight: wave === null ? 1 : wave, wind: wind === null ? 6 : wind });
+  const now = performance.now();
+  if (force || now - lastRelayout > 120) { lastRelayout = now; Plotly.relayout("chart", { shapes: baseShapes.concat(cursorShape()) }); }
+}
+function stopReplay() { playing = false; $("play").classList.remove("on"); $("play").setAttribute("aria-label", "Play"); }
+function startReplay() {
+  const ser = current && SERIES[current.id]; if (!ser) return;
+  if (Number($("scrub").value) >= 1000) { $("scrub").value = 0; lastFlagCheck = 0; }
+  playing = true; $("play").classList.add("on"); $("play").setAttribute("aria-label", "Pause");
+  let prev = performance.now();
+  const tick = (now) => {
+    if (!playing) return;
+    const v = Math.min(1000, Number($("scrub").value) + (now - prev) / 30000 * 1000);   // whole period in ~30 s
+    prev = now; $("scrub").value = v;
+    setTime(Math.round((v / 1000) * (ser.minutes.length - 1)));
+    if (v >= 1000) { stopReplay(); setTime(ser.minutes.length - 1, { force: true }); return; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+$("play").addEventListener("click", () => (playing ? stopReplay() : startReplay()));
+$("scrub").addEventListener("input", () => {
+  const ser = current && SERIES[current.id]; if (!ser) return;
+  stopReplay(); lastFlagCheck = null;
+  setTime(Math.round((Number($("scrub").value) / 1000) * (ser.minutes.length - 1)));
+});
 
 document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 applyStaticText();
