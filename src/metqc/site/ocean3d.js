@@ -1,3 +1,4 @@
+// © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 // Ocean3D: a WebGL ocean surface (three.js) whose sea state is driven by data.
 //   const ocean = Ocean3D.mount(element);
 //   ocean.set({ waveHeight: 3.8, wind: 12, warmth: 0 });   // metres, m/s, 0..1 (tints the water warmer)

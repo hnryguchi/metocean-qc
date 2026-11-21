@@ -1,3 +1,4 @@
+# © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 """Build the static dashboard: one QC run per station, JSON for the browser, reports and status cards.
 
     metqc site --data data --stations stations.geojson --out dist

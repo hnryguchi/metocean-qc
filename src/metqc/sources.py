@@ -1,3 +1,4 @@
+# © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 """Data sources: NOAA NDBC realtime text files and generic CSV."""
 
 from __future__ import annotations

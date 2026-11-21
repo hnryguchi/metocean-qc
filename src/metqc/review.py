@@ -1,3 +1,4 @@
+# © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 """Optional LLM second opinion on QC events. OFF by default.
 
 The rules decide the flags. A reviewer only *explains* each event and says whether it

@@ -1,3 +1,4 @@
+// © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 // metocean-qc dashboard (PT / EN). Reads stations.json and <id>/series.json produced by `metqc site`.
 const FLAG_COLORS = { good: "#2da44e", suspect: "#f5a50a", fail: "#e8231c", not_evaluated: "#8c959f", missing: "#8c959f" };
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
