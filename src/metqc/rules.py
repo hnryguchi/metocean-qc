@@ -1,3 +1,4 @@
+# © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 """Deterministic QC tests. Each test returns findings; none of them modifies data.
 
 Test families follow IOOS QARTOD (gross range, spike, flat line) plus a timing/gap

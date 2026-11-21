@@ -1,3 +1,4 @@
+# © 2026 Henry Noguchi (github.com/hnryguchi). Todos os direitos reservados / All rights reserved. Ver/see LICENSE.
 """Command-line interface: ``metqc fetch`` and ``metqc check``."""
 
 from __future__ import annotations
