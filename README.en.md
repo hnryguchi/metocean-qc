@@ -136,4 +136,4 @@ shape was checked against the installed `anthropic` SDK signature only.
 ## Data and license
 
 - NOAA NDBC data is public domain (U.S. Government work). The test fixture is a 150-record excerpt of station 41010.
-- Code: MIT. Author: Henry Noguchi.
+- Code: © Henry Noguchi. All rights reserved; see [LICENSE](LICENSE).

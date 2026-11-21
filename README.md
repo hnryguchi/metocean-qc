@@ -136,4 +136,4 @@ da requisição foi conferido apenas contra a assinatura do SDK `anthropic` inst
 ## Dados e licença
 
 - Os dados do NOAA NDBC são de domínio público (obra do governo dos EUA). A fixture de teste é um trecho de 150 registros da estação 41010.
-- Código: MIT. Autor: Henry Noguchi.
+- Código: © Henry Noguchi. Todos os direitos reservados; ver [LICENSE](LICENSE).
