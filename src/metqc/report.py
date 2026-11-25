@@ -7,12 +7,15 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
+from .context import explain_all
 from .engine import Event, QCResult, summarize
+from .impact import impact_json, impact_markdown
 from .review import Review
 
 
 def to_json(result: QCResult, events: list[Event], reviews: list[Review]) -> dict:
     s = result.series
+    contexts = {c.event_id: c for c in explain_all(events, s)}
     return {
         "station": s.station,
         "source": s.source,
@@ -28,6 +31,8 @@ def to_json(result: QCResult, events: list[Event], reviews: list[Review]) -> dic
                 "end": e.end.isoformat(),
                 "worst_flag": e.worst.name,
                 "tests": e.tests,
+                "context": {"label": contexts[e.id].label, "reason": contexts[e.id].reason,
+                            "evidence": contexts[e.id].evidence},
                 "findings": [
                     {"time": f.time.isoformat(), "test": f.test, "flag": f.flag.name,
                      "value": f.value, "detail": f.detail}
@@ -37,12 +42,14 @@ def to_json(result: QCResult, events: list[Event], reviews: list[Review]) -> dic
             for e in events
         ],
         "reviews": [asdict(r) for r in reviews],
+        "qc_impact": impact_json(result),
     }
 
 
 def to_markdown(result: QCResult, events: list[Event], reviews: list[Review], max_rows: int = 25) -> str:
     s = result.series
     by_id = {r.event_id: r for r in reviews}
+    contexts = {c.event_id: c for c in explain_all(events, s)}
     out = [f"# QC report: {s.station}", ""]
     if s.times:
         out.append(f"Source: `{s.source}` · {len(s.times)} records · "
@@ -56,16 +63,19 @@ def to_markdown(result: QCResult, events: list[Event], reviews: list[Review], ma
     if not events:
         out.append("No QC events.")
     else:
-        out += ["| Event | Worst flag | Tests | Points | LLM second opinion |", "|---|---|---|---|---|"]
+        out += ["| Event | Worst flag | Tests | Points | Physical context | LLM second opinion |",
+                "|---|---|---|---|---|---|"]
         for e in events[:max_rows]:
             r = by_id.get(e.id)
             opinion = f"{r.verdict} ({r.confidence}): {r.rationale}" if r else "not reviewed"
+            c = contexts[e.id]
             out.append(f"| {e.id} | {e.worst.name} | {', '.join(e.tests)} | {len(e.findings)} | "
-                       f"{opinion.replace('|', '/')} |")
+                       f"**{c.label}**: {c.reason.replace('|', '/')} | {opinion.replace('|', '/')} |")
         if len(events) > max_rows:
             out.append(f"\n{len(events) - max_rows} more events in the JSON report.")
-    out += ["", "_Flags come only from the deterministic tests. LLM opinions are advisory; "
-            "a person decides._", ""]
+    out += [""] + impact_markdown(result)
+    out += ["_Flags come only from the deterministic tests. The physical context and the LLM opinion are "
+            "advisory; a person decides._", ""]
     return "\n".join(out)
 
 

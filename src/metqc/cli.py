@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .engine import group_events, run_qc
 from .report import write_reports
-from .sources import fetch_ndbc, parse_ndbc, read_csv
+from .sources import fetch_ndbc, parse_ndbc, read_csv, read_inmet
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -24,7 +24,8 @@ def main(argv: list[str] | None = None) -> int:
 
     c = sub.add_parser("check", help="run QC on a file and write JSON + Markdown reports")
     c.add_argument("file", type=Path)
-    c.add_argument("--source", choices=["ndbc", "csv"], default="ndbc")
+    c.add_argument("--source", choices=["ndbc", "inmet", "csv"], default="ndbc",
+                   help="ndbc: NOAA realtime file; inmet: INMET automatic-station CSV; csv: generic CSV")
     c.add_argument("--station", default="", help="station name for the report")
     c.add_argument("--time-column", default="timestamp", help="CSV time column")
     c.add_argument("--max-gap-hours", type=float, default=3.0)
@@ -69,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.source == "ndbc":
         series = parse_ndbc(args.file.read_text(encoding="utf-8"), station=args.station or args.file.stem)
+    elif args.source == "inmet":
+        series = read_inmet(args.file, station=args.station)
     else:
         series = read_csv(args.file, time_column=args.time_column, station=args.station)
 

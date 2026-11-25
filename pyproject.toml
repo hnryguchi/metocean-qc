@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metocean-qc"
-version = "0.1.0"
+version = "0.2.0"
 description = "Deterministic quality control for meteorological and ocean time series, with an optional LLM second opinion."
 readme = "README.md"
 license = "LicenseRef-Proprietary"
@@ -29,7 +29,7 @@ metqc = ["site/*"]
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 110
+line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]

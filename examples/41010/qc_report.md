@@ -23,9 +23,20 @@ Source: `ndbc` · 6347 records · 2026-10-05 00:00 to 2026-11-19 02:10 UTC
 
 ## Events (2)
 
-| Event | Worst flag | Tests | Points | LLM second opinion |
-|---|---|---|---|---|
-| WTMP@2026-11-02T01:20Z | SUSPECT | flat_line | 11 | not reviewed |
-| *@2026-11-02T23:10Z | SUSPECT | gap | 1 | not reviewed |
+| Event | Worst flag | Tests | Points | Physical context | LLM second opinion |
+|---|---|---|---|---|---|
+| WTMP@2026-11-02T01:20Z | SUSPECT | flat_line | 11 | **undetermined**: water temperature changes slowly; a long constant run at 0.1 degC resolution is common in a stable sea and needs a check against a nearby buoy or satellite SST | not reviewed |
+| *@2026-11-02T23:10Z | SUSPECT | gap | 1 | **undetermined**: transmission gap: no data to judge | not reviewed |
 
-_Flags come only from the deterministic tests. LLM opinions are advisory; a person decides._
+## QC impact on the numbers
+
+Statistics on the raw series against the series with flagged values removed (FAIL only / FAIL + SUSPECT).
+
+| Variable | Removed (FAIL / +SUSPECT) | Mean raw → cleaned | Min raw → cleaned | Max raw → cleaned |
+|---|---|---|---|---|
+| WTMP | 0 / 11 | 28.07 → 28.07 | 26.70 → 26.70 | 31.10 → 31.10 |
+
+Correlations that moved by 0.02 or more after cleaning: 0.
+
+
+_Flags come only from the deterministic tests. The physical context and the LLM opinion are advisory; a person decides._

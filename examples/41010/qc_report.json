@@ -81,6 +81,11 @@
       "tests": [
         "flat_line"
       ],
+      "context": {
+        "label": "undetermined",
+        "reason": "water temperature changes slowly; a long constant run at 0.1 degC resolution is common in a stable sea and needs a check against a nearby buoy or satellite SST",
+        "evidence": []
+      },
       "findings": [
         {
           "time": "2026-11-02T01:20:00+00:00",
@@ -170,6 +175,11 @@
       "tests": [
         "gap"
       ],
+      "context": {
+        "label": "undetermined",
+        "reason": "transmission gap: no data to judge",
+        "evidence": []
+      },
       "findings": [
         {
           "time": "2026-11-02T23:10:00+00:00",
@@ -181,5 +191,615 @@
       ]
     }
   ],
-  "reviews": []
+  "reviews": [],
+  "qc_impact": {
+    "levels": {
+      "fail": "FAIL values removed",
+      "fail_suspect": "FAIL and SUSPECT values removed"
+    },
+    "variables": [
+      {
+        "variable": "WDIR",
+        "raw": {
+          "n": 6208,
+          "mean": 120.43975515463917,
+          "std": 100.88132613947154,
+          "min": 10.0,
+          "max": 360.0
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6208,
+            "mean": 120.43975515463917,
+            "std": 100.88132613947154,
+            "min": 10.0,
+            "max": 360.0
+          },
+          "fail_suspect": {
+            "n": 6208,
+            "mean": 120.43975515463917,
+            "std": 100.88132613947154,
+            "min": 10.0,
+            "max": 360.0
+          }
+        }
+      },
+      {
+        "variable": "WSPD",
+        "raw": {
+          "n": 6293,
+          "mean": 6.852375655490227,
+          "std": 3.383842563317179,
+          "min": 0.0,
+          "max": 16.0
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6293,
+            "mean": 6.852375655490227,
+            "std": 3.383842563317179,
+            "min": 0.0,
+            "max": 16.0
+          },
+          "fail_suspect": {
+            "n": 6293,
+            "mean": 6.852375655490227,
+            "std": 3.383842563317179,
+            "min": 0.0,
+            "max": 16.0
+          }
+        }
+      },
+      {
+        "variable": "GST",
+        "raw": {
+          "n": 6293,
+          "mean": 8.846178293341808,
+          "std": 4.039992002014825,
+          "min": 0.0,
+          "max": 21.0
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6293,
+            "mean": 8.846178293341808,
+            "std": 4.039992002014825,
+            "min": 0.0,
+            "max": 21.0
+          },
+          "fail_suspect": {
+            "n": 6293,
+            "mean": 8.846178293341808,
+            "std": 4.039992002014825,
+            "min": 0.0,
+            "max": 21.0
+          }
+        }
+      },
+      {
+        "variable": "WVHT",
+        "raw": {
+          "n": 3056,
+          "mean": 2.1896269633507854,
+          "std": 1.249783113719419,
+          "min": 0.6,
+          "max": 5.9
+        },
+        "cleaned": {
+          "fail": {
+            "n": 3056,
+            "mean": 2.1896269633507854,
+            "std": 1.249783113719419,
+            "min": 0.6,
+            "max": 5.9
+          },
+          "fail_suspect": {
+            "n": 3056,
+            "mean": 2.1896269633507854,
+            "std": 1.249783113719419,
+            "min": 0.6,
+            "max": 5.9
+          }
+        }
+      },
+      {
+        "variable": "PRES",
+        "raw": {
+          "n": 6295,
+          "mean": 1016.2646862589357,
+          "std": 3.4491581652388783,
+          "min": 1005.9,
+          "max": 1026.1
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6295,
+            "mean": 1016.2646862589357,
+            "std": 3.4491581652388783,
+            "min": 1005.9,
+            "max": 1026.1
+          },
+          "fail_suspect": {
+            "n": 6295,
+            "mean": 1016.2646862589357,
+            "std": 3.4491581652388783,
+            "min": 1005.9,
+            "max": 1026.1
+          }
+        }
+      },
+      {
+        "variable": "ATMP",
+        "raw": {
+          "n": 6264,
+          "mean": 25.80006385696041,
+          "std": 1.86255572779119,
+          "min": 19.8,
+          "max": 29.3
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6264,
+            "mean": 25.80006385696041,
+            "std": 1.86255572779119,
+            "min": 19.8,
+            "max": 29.3
+          },
+          "fail_suspect": {
+            "n": 6264,
+            "mean": 25.80006385696041,
+            "std": 1.86255572779119,
+            "min": 19.8,
+            "max": 29.3
+          }
+        }
+      },
+      {
+        "variable": "WTMP",
+        "raw": {
+          "n": 6011,
+          "mean": 28.070520712027946,
+          "std": 0.7581872889245423,
+          "min": 26.7,
+          "max": 31.1
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6011,
+            "mean": 28.070520712027946,
+            "std": 0.7581872889245423,
+            "min": 26.7,
+            "max": 31.1
+          },
+          "fail_suspect": {
+            "n": 6000,
+            "mean": 28.07101666666667,
+            "std": 0.7587935123083721,
+            "min": 26.7,
+            "max": 31.1
+          }
+        }
+      },
+      {
+        "variable": "DEWP",
+        "raw": {
+          "n": 6264,
+          "mean": 20.417832056194126,
+          "std": 3.4879834812767,
+          "min": 8.5,
+          "max": 27.0
+        },
+        "cleaned": {
+          "fail": {
+            "n": 6264,
+            "mean": 20.417832056194126,
+            "std": 3.4879834812767,
+            "min": 8.5,
+            "max": 27.0
+          },
+          "fail_suspect": {
+            "n": 6264,
+            "mean": 20.417832056194126,
+            "std": 3.4879834812767,
+            "min": 8.5,
+            "max": 27.0
+          }
+        }
+      }
+    ],
+    "correlations": [
+      {
+        "a": "WDIR",
+        "b": "WSPD",
+        "n_raw": 6208,
+        "r_raw": -0.3650773421560405,
+        "n_cleaned": {
+          "fail": 6208,
+          "fail_suspect": 6208
+        },
+        "r_cleaned": {
+          "fail": -0.3650773421560405,
+          "fail_suspect": -0.3650773421560405
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "GST",
+        "n_raw": 6208,
+        "r_raw": -0.36726373219876235,
+        "n_cleaned": {
+          "fail": 6208,
+          "fail_suspect": 6208
+        },
+        "r_cleaned": {
+          "fail": -0.36726373219876235,
+          "fail_suspect": -0.36726373219876235
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "WVHT",
+        "n_raw": 2965,
+        "r_raw": -0.40644109533892164,
+        "n_cleaned": {
+          "fail": 2965,
+          "fail_suspect": 2965
+        },
+        "r_cleaned": {
+          "fail": -0.40644109533892164,
+          "fail_suspect": -0.40644109533892164
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "PRES",
+        "n_raw": 6208,
+        "r_raw": -0.35337424503077575,
+        "n_cleaned": {
+          "fail": 6208,
+          "fail_suspect": 6208
+        },
+        "r_cleaned": {
+          "fail": -0.35337424503077575,
+          "fail_suspect": -0.35337424503077575
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "ATMP",
+        "n_raw": 6179,
+        "r_raw": 0.03208484368807567,
+        "n_cleaned": {
+          "fail": 6179,
+          "fail_suspect": 6179
+        },
+        "r_cleaned": {
+          "fail": 0.03208484368807567,
+          "fail_suspect": 0.03208484368807567
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "WTMP",
+        "n_raw": 5926,
+        "r_raw": 0.019937539337214438,
+        "n_cleaned": {
+          "fail": 5926,
+          "fail_suspect": 5915
+        },
+        "r_cleaned": {
+          "fail": 0.019937539337214438,
+          "fail_suspect": 0.019766039509973028
+        }
+      },
+      {
+        "a": "WDIR",
+        "b": "DEWP",
+        "n_raw": 6179,
+        "r_raw": -0.027728711886438957,
+        "n_cleaned": {
+          "fail": 6179,
+          "fail_suspect": 6179
+        },
+        "r_cleaned": {
+          "fail": -0.027728711886438957,
+          "fail_suspect": -0.027728711886438957
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "GST",
+        "n_raw": 6293,
+        "r_raw": 0.9852594303039408,
+        "n_cleaned": {
+          "fail": 6293,
+          "fail_suspect": 6293
+        },
+        "r_cleaned": {
+          "fail": 0.9852594303039408,
+          "fail_suspect": 0.9852594303039408
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "WVHT",
+        "n_raw": 3004,
+        "r_raw": 0.703872356775021,
+        "n_cleaned": {
+          "fail": 3004,
+          "fail_suspect": 3004
+        },
+        "r_cleaned": {
+          "fail": 0.703872356775021,
+          "fail_suspect": 0.703872356775021
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "PRES",
+        "n_raw": 6293,
+        "r_raw": 0.29209650065685977,
+        "n_cleaned": {
+          "fail": 6293,
+          "fail_suspect": 6293
+        },
+        "r_cleaned": {
+          "fail": 0.29209650065685977,
+          "fail_suspect": 0.29209650065685977
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "ATMP",
+        "n_raw": 6264,
+        "r_raw": -0.23280746862848398,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.23280746862848398,
+          "fail_suspect": -0.23280746862848398
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "WTMP",
+        "n_raw": 6009,
+        "r_raw": -0.34825084164974923,
+        "n_cleaned": {
+          "fail": 6009,
+          "fail_suspect": 5998
+        },
+        "r_cleaned": {
+          "fail": -0.34825084164974923,
+          "fail_suspect": -0.34799256346329266
+        }
+      },
+      {
+        "a": "WSPD",
+        "b": "DEWP",
+        "n_raw": 6264,
+        "r_raw": -0.0052065157363054585,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.0052065157363054585,
+          "fail_suspect": -0.0052065157363054585
+        }
+      },
+      {
+        "a": "GST",
+        "b": "WVHT",
+        "n_raw": 3004,
+        "r_raw": 0.7327710691585827,
+        "n_cleaned": {
+          "fail": 3004,
+          "fail_suspect": 3004
+        },
+        "r_cleaned": {
+          "fail": 0.7327710691585827,
+          "fail_suspect": 0.7327710691585827
+        }
+      },
+      {
+        "a": "GST",
+        "b": "PRES",
+        "n_raw": 6293,
+        "r_raw": 0.2974495346171447,
+        "n_cleaned": {
+          "fail": 6293,
+          "fail_suspect": 6293
+        },
+        "r_cleaned": {
+          "fail": 0.2974495346171447,
+          "fail_suspect": 0.2974495346171447
+        }
+      },
+      {
+        "a": "GST",
+        "b": "ATMP",
+        "n_raw": 6264,
+        "r_raw": -0.28538786345117745,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.28538786345117745,
+          "fail_suspect": -0.28538786345117745
+        }
+      },
+      {
+        "a": "GST",
+        "b": "WTMP",
+        "n_raw": 6009,
+        "r_raw": -0.37518569270259444,
+        "n_cleaned": {
+          "fail": 6009,
+          "fail_suspect": 5998
+        },
+        "r_cleaned": {
+          "fail": -0.37518569270259444,
+          "fail_suspect": -0.37496463975845046
+        }
+      },
+      {
+        "a": "GST",
+        "b": "DEWP",
+        "n_raw": 6264,
+        "r_raw": -0.059703773070985504,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.059703773070985504,
+          "fail_suspect": -0.059703773070985504
+        }
+      },
+      {
+        "a": "WVHT",
+        "b": "PRES",
+        "n_raw": 3004,
+        "r_raw": 0.18692279478660234,
+        "n_cleaned": {
+          "fail": 3004,
+          "fail_suspect": 3004
+        },
+        "r_cleaned": {
+          "fail": 0.18692279478660234,
+          "fail_suspect": 0.18692279478660234
+        }
+      },
+      {
+        "a": "WVHT",
+        "b": "ATMP",
+        "n_raw": 2985,
+        "r_raw": -0.16845460900603434,
+        "n_cleaned": {
+          "fail": 2985,
+          "fail_suspect": 2985
+        },
+        "r_cleaned": {
+          "fail": -0.16845460900603434,
+          "fail_suspect": -0.16845460900603434
+        }
+      },
+      {
+        "a": "WVHT",
+        "b": "WTMP",
+        "n_raw": 2809,
+        "r_raw": -0.2968191488971088,
+        "n_cleaned": {
+          "fail": 2809,
+          "fail_suspect": 2804
+        },
+        "r_cleaned": {
+          "fail": -0.2968191488971088,
+          "fail_suspect": -0.29653367989029544
+        }
+      },
+      {
+        "a": "WVHT",
+        "b": "DEWP",
+        "n_raw": 2985,
+        "r_raw": -0.020327718015866365,
+        "n_cleaned": {
+          "fail": 2985,
+          "fail_suspect": 2985
+        },
+        "r_cleaned": {
+          "fail": -0.020327718015866365,
+          "fail_suspect": -0.020327718015866365
+        }
+      },
+      {
+        "a": "PRES",
+        "b": "ATMP",
+        "n_raw": 6264,
+        "r_raw": -0.21975320071245866,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.21975320071245866,
+          "fail_suspect": -0.21975320071245866
+        }
+      },
+      {
+        "a": "PRES",
+        "b": "WTMP",
+        "n_raw": 6011,
+        "r_raw": -0.21672217566795607,
+        "n_cleaned": {
+          "fail": 6011,
+          "fail_suspect": 6000
+        },
+        "r_cleaned": {
+          "fail": -0.21672217566795607,
+          "fail_suspect": -0.2162455612880501
+        }
+      },
+      {
+        "a": "PRES",
+        "b": "DEWP",
+        "n_raw": 6264,
+        "r_raw": -0.2081158981117319,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": -0.2081158981117319,
+          "fail_suspect": -0.2081158981117319
+        }
+      },
+      {
+        "a": "ATMP",
+        "b": "WTMP",
+        "n_raw": 5984,
+        "r_raw": 0.7153952999681608,
+        "n_cleaned": {
+          "fail": 5984,
+          "fail_suspect": 5973
+        },
+        "r_cleaned": {
+          "fail": 0.7153952999681608,
+          "fail_suspect": 0.7155635864101246
+        }
+      },
+      {
+        "a": "ATMP",
+        "b": "DEWP",
+        "n_raw": 6264,
+        "r_raw": 0.8554294085039978,
+        "n_cleaned": {
+          "fail": 6264,
+          "fail_suspect": 6264
+        },
+        "r_cleaned": {
+          "fail": 0.8554294085039978,
+          "fail_suspect": 0.8554294085039978
+        }
+      },
+      {
+        "a": "WTMP",
+        "b": "DEWP",
+        "n_raw": 5984,
+        "r_raw": 0.5820233228193838,
+        "n_cleaned": {
+          "fail": 5984,
+          "fail_suspect": 5973
+        },
+        "r_cleaned": {
+          "fail": 0.5820233228193838,
+          "fail_suspect": 0.5824674282900564
+        }
+      }
+    ]
+  }
 }

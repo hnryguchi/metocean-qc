@@ -31,17 +31,38 @@ As boias estão em [`stations.geojson`](stations.geojson), que o GitHub renderiz
 **Teste sem instalar nada:** o botão do Codespaces acima abre um ambiente pronto que baixa a boia 41010
 e gera o relatório e o card na inicialização.
 
+## O que tem de diferente
+
+Já existem boas ferramentas de controle de qualidade: o [ioos_qc](https://github.com/ioos/ioos_qc) (a implementação
+oficial dos testes QARTOD), o [CoTeDe](https://github.com/castelao/CoTeDe) (perfis oceanográficos) e o
+[SaQC](https://rdm-software.pages.ufz.de/saqc/) (séries ambientais). Os testes de limite daqui são versões mais simples
+dos testes delas. O metocean-qc se diferencia em três pontos:
+
+| | metocean-qc | ioos_qc / CoTeDe / SaQC |
+|---|---|---|
+| **Explicação física de cada alerta** | Sim, determinística: olha o que as outras variáveis fizeram e rotula o evento como provável tempo real (frente fria, pancada de chuva, rajada) ou provável defeito de sensor | Marcam o valor; a interpretação fica com quem analisa |
+| **Impacto do QC nos números** | Relatório de quanto médias, extremos e correlações entre variáveis mudam ao remover os valores marcados | Não fazem |
+| **Estações do INMET** | Lê os arquivos históricos oficiais direto (vírgula decimal, -9999, dois formatos de data, pressão ao nível da estação) | Exigem conversão prévia |
+| Execução diária com painel publicado | Sim (GitHub Actions + GitHub Pages) | Não é o foco |
+| Dependências | Nenhuma (só biblioteca padrão) | numpy/pandas e outras |
+
+A pergunta por trás do relatório de impacto é a que importa num estudo de clima: se alguns valores ruins mudam uma
+média ou uma correlação, uma conclusão tirada da série bruta não é robusta.
+
 ## Como funciona
 
 ```mermaid
 flowchart LR
-    A[Arquivo NOAA NDBC ou CSV] --> B[Parsing e ordenação]
-    B --> C[Testes determinísticos<br/>gross range, spike, flat line, lacunas]
+    A[NOAA NDBC, INMET ou CSV] --> B[Parsing e ordenação]
+    B --> C[Testes determinísticos<br/>gross range, spike, flat line,<br/>taxa de variação, lacunas]
     C --> D[Flags por valor<br/>esquema QARTOD]
     C --> E[Agrupamento de achados em eventos]
+    E --> H[Contexto físico determinístico<br/>tempo real ou sensor?]
+    D --> I[Impacto do QC<br/>estatísticas e correlações]
     E -->|opcional, desligado por padrão| F[Segunda opinião do LLM<br/>saída em JSON schema]
     D --> G[Relatórios<br/>JSON + Markdown]
-    E --> G
+    H --> G
+    I --> G
     F --> G
 ```
 
@@ -49,15 +70,24 @@ flowchart LR
 - **Testes**:
   - gross range (limites físicos → falha, limites climatológicos → suspeito);
   - spike (desvio em relação à média dos vizinhos, sinalizado apenas no máximo local, para que os valores adjacentes a um spike não sejam sinalizados);
-  - flat line (valor inalterado por N horas);
-  - lacunas entre registros.
+  - flat line (valor inalterado por N horas; valores no limite físico, como vento calmo ou umidade saturada, não contam);
+  - taxa de variação (mudança sustentada em cerca de 1 hora, comparada com o valor de 1 hora antes, não com o registro anterior);
+  - lacunas entre registros (no INMET, uma hora com todas as variáveis em -9999 conta como sem registro).
+- **Limites escalados pelo intervalo**: os limites de spike foram calibrados para dados de 10 minutos e crescem com a raiz do intervalo (dados horários: ×2,45), porque o tempo muda mais entre dois registros com 1 hora de distância.
 - **Eventos** agrupam achados próximos da mesma variável, de modo que um sensor travado gera um alerta, não 80.
+- **Contexto físico** (`context.py`) rotula cada evento a partir das outras variáveis em ±3 h, com regras de meteorologia:
+  queda ou subida de pressão com vento mais forte ou resfriamento → passagem de frente; resfriamento com umidade subindo ou
+  chuva → pancada ou corrente descendente; valor parado enquanto o resto da estação varia → provável sensor travado;
+  salto de um ponto que nenhuma outra variável acompanha → provável sensor. O rótulo nunca altera o flag.
+- **Impacto do QC** (`impact.py`) compara média, desvio, mínimo, máximo e as correlações de Pearson entre pares de variáveis
+  na série bruta e na série sem os valores marcados (só FAIL, e FAIL + SUSPECT).
 - **Revisão por LLM** (`--review claude`) envia cada evento com uma janela de ±6 h de *todas* as variáveis e solicita veredito, grau de confiança, evidências e ação recomendada. A saída é restrita a um JSON schema. Uma recusa vira "incerto, requer revisão humana". A revisão nunca altera os flags.
 
 ## Início rápido
 
 ```bash
 pip install -e .                       # sem dependências de runtime (apenas biblioteca padrão)
+metqc check INMET_SE_RJ_A619_PARATY_01-01-2024_A_31-12-2024.CSV --source inmet --out reports/A619   # estação do INMET
 metqc fetch 41010                      # últimos ~45 dias da boia 41010 do NOAA NDBC (domínio público)
 metqc check data/41010.txt --out reports/41010
 metqc check data/41010.txt --out reports/41010 --card reports/41010/status.svg   # + card SVG de status
@@ -96,15 +126,37 @@ após 72 h), e o raciocínio está documentado em [`src/metqc/config.py`](src/me
 
 Relatório de exemplo: [`examples/41010/qc_report.md`](examples/41010/qc_report.md).
 
+### Estações do INMET (dados reais de 2024)
+
+Testado com os arquivos históricos oficiais de 2024 de duas estações automáticas do RJ (8.784 registros horários cada;
+um ano inteiro roda em cerca de 6 segundos):
+
+| Estação | Eventos | O que apareceu |
+|---|---|---|
+| A619 Paraty | 4 | uma queda de ponto de orvalho junto com resfriamento e umidade subindo (rotulada como pancada de chuva provável), dois saltos de umidade e ponto de orvalho sem assinatura física clara e um período de umidade parada |
+| A608 Macaé | 37 | 36 interrupções de transmissão, 26 delas em fevereiro: a estação passou semanas enviando só algumas horas por dia (883 horas sem dado no ano, a maior lacuna com 8 dias) |
+
+**Os dados reais mudaram as regras, de novo.** A primeira versão para o INMET gerou 142 e 148 eventos, quase todos falsos:
+1. umidade parada em 95–98 % por mais de 12 h durante chuva noturna virava FAIL. É ar saturado: sensores capacitivos estabilizam
+   alguns pontos abaixo de 100 %. Sequências a partir de 94 % não entram mais no teste de flat line;
+2. uma queda de 30,8 para 25,2 °C com 7,2 mm de chuva virava FAIL de spike. Os limites eram de dados de 10 minutos e agora
+   escalam com o intervalo;
+3. um valor isolado entre horas sem dado era comparado com vizinhos de horas antes ou depois. Vizinhos a mais de 3 h não
+   são mais usados.
+
+Na direção oposta, a lacuna de Macaé não aparecia, porque o INMET mantém a linha da hora e preenche os valores com -9999.
+
 ## Estrutura do projeto
 
 ```
 src/metqc/
   models.py    Series, Flag (valores QARTOD), Finding
-  sources.py   parser e downloader de arquivos realtime do NDBC, leitor de CSV
+  sources.py   parser e downloader de arquivos realtime do NDBC, leitor do INMET, leitor de CSV
   config.py    limites padrão por variável, com a justificativa de cada um
   rules.py     testes determinísticos (sem efeitos colaterais)
   engine.py    executa os testes, mantém o pior flag por valor, agrupa eventos
+  context.py   contexto físico determinístico de cada evento (tempo real ou sensor?)
+  impact.py    impacto do QC em médias, extremos e correlações
   review.py    revisor opcional por LLM (Claude), prompt e JSON schema
   report.py    relatórios em JSON e Markdown
   card.py      card SVG de status (últimas leituras, gráfico de 72 h com pontos sinalizados)
@@ -129,11 +181,14 @@ da requisição foi conferido apenas contra a assinatura do SDK `anthropic` inst
 ## Limitações e próximos passos
 
 - Os limiares padrão são globais e amplos. O uso real exige limites por estação e por época do ano (por exemplo, derivados de climatologia).
-- Ainda não há teste de taxa de variação nem testes multivariados; o raciocínio entre variáveis existe apenas na etapa opcional de LLM.
-- Próximos passos: fontes brasileiras (estações automáticas do INMET, boias do PNBOIA), arquivo de limites configurável e um conjunto
-  de avaliação com eventos rotulados por pessoas, para medir se a segunda opinião do LLM de fato ajuda.
+- As regras de contexto físico são poucas e conservadoras; muitos eventos ficam como "indeterminado". Ainda não foram avaliadas
+  contra eventos rotulados por meteorologistas.
+- O download automático do INMET ainda não existe: o arquivo anual é baixado à mão no portal.
+- Próximos passos: boias do PNBOIA e da rede PIRATA, limites por estação a partir da climatologia da própria série,
+  comparação com estações vizinhas e um conjunto de avaliação com eventos rotulados por pessoas.
 
 ## Dados e licença
 
 - Os dados do NOAA NDBC são de domínio público (obra do governo dos EUA). A fixture de teste é um trecho de 150 registros da estação 41010.
+- Os dados do INMET são públicos ([portal.inmet.gov.br/dadoshistoricos](https://portal.inmet.gov.br/dadoshistoricos)). Os testes usam um trecho sintético no mesmo formato, identificado como tal.
 - Código: © Henry Noguchi. Todos os direitos reservados; ver [LICENSE](LICENSE).
