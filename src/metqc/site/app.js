@@ -149,9 +149,12 @@ function renderCards() {
 
 function renderMap() {
   map = L.map("map", { scrollWheelZoom: false }).setView([36, -95], 3);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 9, subdomains: "abcd", attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+  // Esri dark gray canvas: no API key needed (CARTO basemaps started requiring one).
+  const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+  L.tileLayer(esri + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    maxZoom: 9, attribution: "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
   }).addTo(map);
+  L.tileLayer(esri + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { maxZoom: 9 }).addTo(map);
   DATA.stations.forEach((s) => {
     const m = L.circleMarker([s.lat, s.lon], {
       radius: 9, color: "#e8f4fd", weight: 1.5, fillColor: s.events_7d ? FLAG_COLORS.suspect : FLAG_COLORS.good, fillOpacity: 0.95,
